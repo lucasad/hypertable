@@ -63,8 +63,10 @@ void TableInfoMap::get(const String &table_id, TableInfoPtr &info) {
 
   SchemaPtr schema;
 
-  if (m_schema_cache)
-    m_schema_cache->get(table_id, schema);
+  if (m_schema_cache) {
+    if (!m_schema_cache->get(table_id, schema))
+      HT_FATALF("Unable to locate schema for table %s", table_id.c_str());
+  }
   else {
     DynamicBuffer valbuf;
     String tablefile = Global::toplevel_dir + "/tables/" + table_id;
