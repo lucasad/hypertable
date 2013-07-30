@@ -519,22 +519,22 @@ void RangeServer::initialize(PropertiesPtr &props) {
 namespace {
 
   struct ByFragmentNumber {
-    bool operator()(const String &x, const String &y) const {
-      int num_x = atoi(x.c_str());
-      int num_y = atoi(y.c_str());
+    bool operator()(const Filesystem::DirectoryEntry &x, const Filesystem::DirectoryEntry &y) const {
+      int num_x = atoi(x.name.c_str());
+      int num_y = atoi(y.name.c_str());
       return num_x < num_y;
     }
   };
 
   void add_mark_file_to_commit_logs(const String &logname) {
-    vector<String> listing;
-    vector<String> listing2;
+    vector<Filesystem::DirectoryEntry> listing;
+    vector<Filesystem::DirectoryEntry> listing2;
     String logdir = Global::log_dir + "/" + logname;
 
     try {
       if (!Global::log_dfs->exists(logdir))
         return;
-      Global::log_dfs->readdir(logdir, listing);
+      Global::log_dfs->posix_readdir(logdir, listing);
     }
     catch (Hypertable::Exception &e) {
       HT_FATALF("Unable to read log directory '%s'", logdir.c_str());
@@ -546,8 +546,8 @@ namespace {
     sort(listing.begin(), listing.end(), ByFragmentNumber());
 
     // Remove zero-length files
-    foreach_ht (String &entry, listing) {
-      String fragment_file = logdir + "/" + entry;
+    foreach_ht (Filesystem::DirectoryEntry &entry, listing) {
+      String fragment_file = logdir + "/" + entry.name;
       try {
         if (Global::log_dfs->length(fragment_file) == 0) {
           HT_INFOF("Removing log fragment '%s' because it has zero length",
@@ -566,7 +566,7 @@ namespace {
       return;
 
     char *endptr;
-    long num = strtol(listing2.back().c_str(), &endptr, 10);
+    long num = strtol(listing2.back().name.c_str(), &endptr, 10);
     String mark_filename = logdir + "/" + (int64_t)num + ".mark";
 
     try {

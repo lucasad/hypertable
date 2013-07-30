@@ -26,6 +26,7 @@
 #include "Common/Config.h"
 #include "Common/DynamicBuffer.h"
 #include "Common/Error.h"
+#include "Common/Filesystem.h"
 #include "Common/FileUtils.h"
 #include "Common/Logger.h"
 #include "Common/StringExt.h"
@@ -98,10 +99,10 @@ CommitLog::initialize(const String &log_dir, PropertiesPtr &props,
   }
   else {  // chose one past the max one found in the directory
     uint32_t num;
-    std::vector<String> listing;
-    m_fs->readdir(m_log_dir, listing);
+    std::vector<Filesystem::DirectoryEntry> listing;
+    m_fs->posix_readdir(m_log_dir,listing);
     for (size_t i=0; i<listing.size(); i++) {
-      num = atoi(listing[i].c_str());
+      num = atoi(listing[i].name.c_str());
       if (num >= m_cur_fragment_num)
         m_cur_fragment_num = num + 1;
     }
