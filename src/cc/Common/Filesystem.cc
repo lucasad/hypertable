@@ -38,6 +38,15 @@
 using namespace Hypertable;
 using namespace Serialization;
 
+
+bool operator< (const Hypertable::Filesystem::DirectoryEntry& lhs, const Hypertable::Filesystem::DirectoryEntry& rhs) {
+  return lhs.name < rhs.name;
+}
+bool operator> (const Hypertable::Filesystem::DirectoryEntry& lhs, const Hypertable::Filesystem::DirectoryEntry& rhs) {
+  return lhs.name > rhs.name;
+}
+
+
 int Filesystem::decode_response_open(EventPtr &event_ptr) {
   const uint8_t *decode_ptr = event_ptr->payload;
   size_t decode_remain = event_ptr->payload_len;

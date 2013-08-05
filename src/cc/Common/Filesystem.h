@@ -560,5 +560,9 @@ namespace Hypertable {
 
 } // namespace Hypertable
 
+bool operator< (const Hypertable::Filesystem::DirectoryEntry& lhs, const Hypertable::Filesystem::DirectoryEntry& rhs);
+bool operator> (const Hypertable::Filesystem::DirectoryEntry& lhs, const Hypertable::Filesystem::DirectoryEntry& rhs);
+
+
 #endif // HYPERTABLE_FILESYSTEM_H
 
