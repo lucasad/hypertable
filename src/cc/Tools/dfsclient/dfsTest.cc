@@ -38,6 +38,7 @@ extern "C" {
 
 #include "Common/Init.h"
 #include "Common/Error.h"
+#include "Common/Filesystem.h"
 #include "Common/FileUtils.h"
 #include "Common/InetAddr.h"
 #include "Common/Logger.h"
@@ -87,27 +88,30 @@ namespace {
     thread1.join();
     thread2.join();
 
-    if (system("diff words output.a"))
+    if (system("cmp words output.a"))
       exit(1);
 
-    if (system("diff output.a output.b"))
+    if (system("cmp output.a output.b"))
       exit(1);
+  }
+
+  bool compare_dirent(const Filesystem::DirectoryEntry& lhs, const Filesystem::DirectoryEntry& rhs) {
+    return lhs < rhs;
   }
 
   void test_readdir(DfsBroker::Client *client, const String &testdir) {
     ofstream filestr ("dfsTest.out");
-    vector<string> listing;
+    vector<Filesystem::DirectoryEntry> listing;
 
-    client->readdir(testdir, listing);
-
-    sort(listing.begin(), listing.end());
+    client->posix_readdir(testdir, listing);
+    sort(listing.begin(), listing.end(), compare_dirent);
 
     for (size_t i=0; i<listing.size(); i++)
-      filestr << listing[i] << endl;
+      filestr << listing[i].name << endl;
 
     filestr.close();
 
-    if (system("diff dfsTest.out dfsTest.golden"))
+    if (system("cmp dfsTest.out dfsTest.golden"))
       exit(1);
   }
 
